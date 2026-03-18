@@ -1,0 +1,15 @@
+# Backend
+backend/cms.db
+backend/go.sum
+
+# Frontend
+frontend/node_modules
+frontend/dist
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
