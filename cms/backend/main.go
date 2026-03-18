@@ -60,8 +60,8 @@ func main() {
 	routes.SetupRoutes(r, db)
 
 	// 启动服务
-	log.Println("🚀 服务器启动在 :8080")
-	if err := r.Run(":8080"); err != nil {
+	log.Println("🚀 服务器启动在 :8082")
+	if err := r.Run(":8082"); err != nil {
 		log.Fatal("❌ 启动服务器失败:", err)
 	}
 
