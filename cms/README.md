@@ -8,7 +8,7 @@
 - Golang 1.21+
 - Gin (Web 框架)
 - GORM (ORM)
-- SQLite (数据库)
+- MySQL (数据库)
 - JWT (认证)
 
 **前端:**
@@ -35,6 +35,19 @@ cms/
 
 ## 快速开始
 
+### 0. 准备 MySQL 数据库
+
+```sql
+CREATE DATABASE cms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+或者复制环境变量文件并修改配置：
+```bash
+cd backend
+cp .env.example .env
+# 编辑 .env 文件，修改 MySQL 连接信息
+```
+
 ### 1. 启动后端
 
 ```bash
@@ -44,6 +57,14 @@ go run main.go
 ```
 
 后端将在 `http://localhost:8080` 启动
+
+**环境变量配置:**
+- `DB_HOST` - MySQL 主机 (默认：localhost)
+- `DB_PORT` - MySQL 端口 (默认：3306)
+- `DB_USER` - 数据库用户 (默认：root)
+- `DB_PASSWORD` - 数据库密码 (默认：root)
+- `DB_NAME` - 数据库名 (默认：cms)
+- 或直接设置 `MYSQL_DSN` 指定完整连接字符串
 
 ### 2. 启动前端
 

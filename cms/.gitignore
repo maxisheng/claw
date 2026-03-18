@@ -1,6 +1,7 @@
 # Backend
 backend/cms.db
 backend/go.sum
+backend/.env
 
 # Frontend
 frontend/node_modules

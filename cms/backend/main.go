@@ -3,19 +3,35 @@ package main
 import (
 	"cms-backend/models"
 	"cms-backend/routes"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
+	// 从环境变量读取 MySQL 配置，或使用默认值
+	dsn := os.Getenv("MYSQL_DSN")
+	if dsn == "" {
+		// 默认 MySQL 连接配置
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			getEnv("DB_USER", "root"),
+			getEnv("DB_PASSWORD", "root"),
+			getEnv("DB_HOST", "localhost"),
+			getEnv("DB_PORT", "3306"),
+			getEnv("DB_NAME", "cms"),
+		)
+	}
+
 	// 初始化数据库
-	db, err := gorm.Open(sqlite.Open("cms.db"), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
+	log.Println("Connected to MySQL database")
 
 	// 自动迁移
 	err = db.AutoMigrate(&models.User{}, &models.Article{}, &models.Category{})
@@ -56,4 +72,11 @@ func main() {
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
