@@ -14,12 +14,12 @@ function Login() {
     setLoading(true)
     try {
       const response = await api.post('/login', values)
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-      message.success('Login successful!')
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('user', JSON.stringify(response.admin))
+      message.success('登录成功！')
       navigate('/')
     } catch (err) {
-      message.error('Invalid username or password')
+      message.error(err.message || '用户名或密码错误')
     } finally {
       setLoading(false)
     }
@@ -35,7 +35,7 @@ function Login() {
     }}>
       <Card style={{ width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <Title level={2}>CMS Login</Title>
+          <Title level={2}>CMS 管理系统</Title>
         </div>
         <Form
           name="login"
@@ -46,32 +46,32 @@ function Login() {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: 'Please input your username!' }]}
+            rules={[{ required: true, message: '请输入用户名' }]}
           >
             <Input 
               prefix={<UserOutlined />} 
-              placeholder="Username"
+              placeholder="用户名"
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}
+            rules={[{ required: true, message: '请输入密码' }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Password"
+              placeholder="密码"
             />
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block>
-              Login
+              登录
             </Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: 'center', color: '#999', fontSize: 12 }}>
-          Default: admin / admin123
+          默认账户：admin / admin123
         </div>
       </Card>
     </div>

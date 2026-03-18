@@ -16,12 +16,12 @@ function ArticleEdit() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    api.get('/categories').then(res => setCategories(res.data))
+    api.get('/categories').then(res => setCategories(res || []))
     if (id) {
       setLoading(true)
       api.get(`/articles/${id}`)
         .then(res => {
-          form.setFieldsValue(res.data)
+          form.setFieldsValue(res)
         })
         .finally(() => setLoading(false))
     }
@@ -32,15 +32,15 @@ function ArticleEdit() {
     try {
       if (id) {
         await api.put(`/articles/${id}`, values)
-        message.success('Article updated successfully')
+        message.success('文章更新成功')
       } else {
         await api.post('/articles', values)
-        message.success('Article created successfully')
+        message.success('文章创建成功')
       }
       navigate('/articles')
     } catch (error) {
       console.error('Failed to save article:', error)
-      message.error('Failed to save article')
+      message.error(error.message || '保存文章失败')
     } finally {
       setSubmitting(false)
     }
@@ -49,7 +49,7 @@ function ArticleEdit() {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <Title level={2}>{id ? 'Edit Article' : 'New Article'}</Title>
+        <Title level={2}>{id ? '编辑文章' : '新建文章'}</Title>
       </div>
       <Card loading={loading}>
         <Form
@@ -60,32 +60,32 @@ function ArticleEdit() {
         >
           <Form.Item
             name="title"
-            label="Title"
-            rules={[{ required: true, message: 'Please input the title!' }]}
+            label="标题"
+            rules={[{ required: true, message: '请输入文章标题' }]}
           >
-            <Input placeholder="Enter article title" />
+            <Input placeholder="请输入文章标题" />
           </Form.Item>
 
           <Form.Item
             name="slug"
-            label="Slug"
-            rules={[{ required: true, message: 'Please input the slug!' }]}
+            label="URL 标识"
+            rules={[{ required: true, message: '请输入 URL 标识' }]}
           >
-            <Input placeholder="e.g., my-first-article" />
+            <Input placeholder="例如：my-first-article" />
           </Form.Item>
 
           <Form.Item
             name="summary"
-            label="Summary"
+            label="摘要"
           >
-            <TextArea rows={2} placeholder="Brief summary of the article" />
+            <TextArea rows={2} placeholder="文章摘要简介" />
           </Form.Item>
 
           <Form.Item
             name="category_id"
-            label="Category"
+            label="分类"
           >
-            <Select placeholder="Select a category" allowClear>
+            <Select placeholder="请选择分类" allowClear>
               {categories.map(cat => (
                 <Select.Option key={cat.id} value={cat.id}>{cat.name}</Select.Option>
               ))}
@@ -94,22 +94,22 @@ function ArticleEdit() {
 
           <Form.Item
             name="status"
-            label="Status"
+            label="状态"
             initialValue="draft"
           >
             <Select>
-              <Select.Option value="draft">Draft</Select.Option>
-              <Select.Option value="published">Published</Select.Option>
-              <Select.Option value="archived">Archived</Select.Option>
+              <Select.Option value="draft">草稿</Select.Option>
+              <Select.Option value="published">已发布</Select.Option>
+              <Select.Option value="archived">已归档</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item
             name="content"
-            label="Content"
-            rules={[{ required: true, message: 'Please input the content!' }]}
+            label="内容"
+            rules={[{ required: true, message: '请输入文章内容' }]}
           >
-            <TextArea rows={15} placeholder="Write your article content here..." />
+            <TextArea rows={15} placeholder="请输入文章内容..." />
           </Form.Item>
 
           <Form.Item>
@@ -120,13 +120,13 @@ function ArticleEdit() {
                 icon={<SaveOutlined />}
                 loading={submitting}
               >
-                Save
+                保存
               </Button>
               <Button 
                 icon={<UndoOutlined />} 
                 onClick={() => navigate('/articles')}
               >
-                Cancel
+                取消
               </Button>
             </Space>
           </Form.Item>

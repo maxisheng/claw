@@ -17,10 +17,10 @@ function Articles() {
   const loadArticles = async () => {
     try {
       const response = await api.get('/articles')
-      setArticles(response.data)
+      setArticles(response)
     } catch (error) {
       console.error('Failed to load articles:', error)
-      message.error('Failed to load articles')
+      message.error('加载文章失败')
     } finally {
       setLoading(false)
     }
@@ -29,11 +29,11 @@ function Articles() {
   const handleDelete = async (id) => {
     try {
       await api.delete(`/articles/${id}`)
-      message.success('Article deleted successfully')
+      message.success('文章已删除')
       loadArticles()
     } catch (error) {
       console.error('Failed to delete article:', error)
-      message.error('Failed to delete article')
+      message.error('删除文章失败')
     }
   }
 
@@ -45,7 +45,7 @@ function Articles() {
 
   const columns = [
     {
-      title: 'Title',
+      title: '标题',
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
@@ -53,44 +53,49 @@ function Articles() {
       ),
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tag color={statusColors[status]}>{status.toUpperCase()}</Tag>
+        <Tag color={statusColors[status]}>{status === 'published' ? '已发布' : status === 'draft' ? '草稿' : '已归档'}</Tag>
       ),
     },
     {
-      title: 'Author',
+      title: '作者',
       dataIndex: ['author', 'username'],
       key: 'author',
     },
     {
-      title: 'Category',
+      title: '分类',
       dataIndex: ['category', 'name'],
       key: 'category',
     },
     {
-      title: 'Created',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date) => new Date(date).toLocaleDateString(),
+      title: '浏览量',
+      dataIndex: 'view_count',
+      key: 'view_count',
     },
     {
-      title: 'Actions',
+      title: '创建时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date) => new Date(date).toLocaleDateString('zh-CN'),
+    },
+    {
+      title: '操作',
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
           <Link to={`/articles/${record.id}`}>
-            <Button type="link" icon={<EditOutlined />}>Edit</Button>
+            <Button type="link" icon={<EditOutlined />}>编辑</Button>
           </Link>
           <Popconfirm
-            title="Are you sure to delete this article?"
+            title="确定要删除这篇文章吗？"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="确定"
+            cancelText="取消"
           >
-            <Button type="link" danger icon={<DeleteOutlined />}>Delete</Button>
+            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -100,9 +105,9 @@ function Articles() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={2} style={{ margin: 0 }}>Articles</Title>
+        <Title level={2} style={{ margin: 0 }}>文章管理</Title>
         <Link to="/articles/new">
-          <Button type="primary" icon={<PlusOutlined />}>New Article</Button>
+          <Button type="primary" icon={<PlusOutlined />}>新建文章</Button>
         </Link>
       </div>
       <Table
@@ -110,7 +115,7 @@ function Articles() {
         dataSource={articles}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 10, showSizeChanger: true }}
       />
     </div>
   )

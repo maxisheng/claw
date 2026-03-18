@@ -1,11 +1,11 @@
 package main
 
 import (
+	"cms-backend/middleware"
 	"cms-backend/models"
 	"cms-backend/routes"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -13,43 +13,28 @@ import (
 )
 
 func main() {
-	// 从环境变量读取 MySQL 配置，或使用默认值
-	dsn := os.Getenv("MYSQL_DSN")
-	if dsn == "" {
-		// 默认 MySQL 连接配置
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-			getEnv("DB_USER", "root"),
-			getEnv("DB_PASSWORD", "root"),
-			getEnv("DB_HOST", "localhost"),
-			getEnv("DB_PORT", "3306"),
-			getEnv("DB_NAME", "cms"),
-		)
-	}
+	// MySQL 连接配置
+	dsn := "root:123456@tcp(localhost:3306)/cms?charset=utf8mb4&parseTime=True&loc=Local"
 
 	// 初始化数据库
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	log.Println("Connected to MySQL database")
+	log.Println("✅ Connected to MySQL database")
 
-	// 自动迁移
-	err = db.AutoMigrate(&models.User{}, &models.Article{}, &models.Category{})
+	// 自动迁移数据表
+	err = db.AutoMigrate(&models.Admin{}, &models.Article{}, &models.Category{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
+	log.Println("✅ Database tables migrated")
 
 	// 创建默认管理员账户
-	var admin models.User
-	if db.Where("username = ?", "admin").First(&admin).Error != nil {
-		db.Create(&models.User{
-			Username: "admin",
-			Password: "admin123", // 实际生产环境应该加密
-			Role:     "admin",
-		})
-	}
+	CreateDefaultAdmin(db)
 
 	// 设置 Gin
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	// 配置 CORS
@@ -68,15 +53,25 @@ func main() {
 	routes.SetupRoutes(r, db)
 
 	// 启动服务
-	log.Println("Server starting on :8080")
+	log.Println("🚀 Server starting on :8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
 }
 
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+// CreateDefaultAdmin 创建默认管理员账户
+func CreateDefaultAdmin(db *gorm.DB) {
+	var admin models.Admin
+	if db.Where("username = ?", "admin").First(&admin).Error != nil {
+		// 密码加密
+		hashedPassword, _ := middleware.HashPassword("admin123")
+		db.Create(&models.Admin{
+			Username: "admin",
+			Password: hashedPassword,
+			Email:    "admin@example.com",
+			Role:     models.RoleSuperAdmin,
+			Status:   models.StatusActive,
+		})
+		log.Println("✅ Default admin created: admin / admin123")
 	}
-	return defaultValue
 }
