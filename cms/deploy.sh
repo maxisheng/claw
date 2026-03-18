@@ -39,24 +39,23 @@ mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS cms CHARACTER SET utf8m
 
 # 5. 构建后端
 echo "🔨 构建后端..."
-cd backend
+cd /home/admin/cms/backend
 go mod tidy
 CGO_ENABLED=0 GOOS=linux go build -o cms-backend main.go
 echo "✅ 后端构建完成"
 
 # 6. 构建前端
 echo "🔨 构建前端..."
-cd ../frontend
+cd /home/admin/cms/frontend
 npm install --registry https://registry.npmmirror.com
 npm run build
 echo "✅ 前端构建完成"
 
 # 7. 创建部署目录
 echo "📁 创建部署目录..."
-cd ..
-mkdir -p /opt/cms
-cp backend/cms-backend /opt/cms/
-cp -r frontend/dist/* /opt/cms/ 2>/dev/null || true
+mkdir -p /home/admin/cms-deploy
+cp /home/admin/cms/backend/cms-backend /home/admin/cms-deploy/
+cp -r /home/admin/cms/frontend/dist/* /home/admin/cms-deploy/ 2>/dev/null || true
 
 # 8. 创建 systemd 服务
 echo "⚙️  创建 systemd 服务..."
@@ -68,8 +67,8 @@ After=network.target mysql.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/cms
-ExecStart=/opt/cms/cms-backend
+WorkingDirectory=/home/admin/cms-deploy
+ExecStart=/home/admin/cms-deploy/cms-backend
 Restart=always
 RestartSec=10
 StandardOutput=journal

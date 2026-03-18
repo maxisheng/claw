@@ -62,7 +62,7 @@ echo ""
 
 # 3. 克隆/更新代码
 echo -e "${YELLOW}[3/8] 获取代码...${NC}"
-cd /root
+cd /home/admin
 if [ -d "cms" ]; then
     echo "更新现有代码..."
     cd cms
@@ -78,7 +78,7 @@ echo ""
 
 # 4. 构建后端
 echo -e "${YELLOW}[4/8] 构建后端...${NC}"
-cd /root/cms/backend
+cd /home/admin/cms/backend
 go mod tidy
 CGO_ENABLED=0 GOOS=linux go build -o cms-backend main.go
 echo -e "${GREEN}✅ 后端构建完成${NC}"
@@ -95,7 +95,7 @@ echo ""
 
 # 6. 启动后端
 echo -e "${YELLOW}[6/8] 启动后端...${NC}"
-cd /root/cms/backend
+cd /home/admin/cms/backend
 nohup go run main.go > /tmp/cms-backend.log 2>&1 &
 sleep 3
 
@@ -112,7 +112,7 @@ echo ""
 
 # 7. 构建前端
 echo -e "${YELLOW}[7/8] 构建前端...${NC}"
-cd /root/cms/frontend
+cd /home/admin/cms/frontend
 npm install --registry https://registry.npmmirror.com
 npm run build
 echo -e "${GREEN}✅ 前端构建完成${NC}"
@@ -135,7 +135,7 @@ echo ""
 echo "📋 管理命令："
 echo "   查看后端日志：tail -f /tmp/cms-backend.log"
 echo "   停止后端：pkill -f cms-backend"
-echo "   重启后端：cd /root/cms/backend && nohup go run main.go > /tmp/cms-backend.log 2>&1 &"
+echo "   重启后端：cd /home/admin/cms/backend && nohup go run main.go > /tmp/cms-backend.log 2>&1 &"
 echo ""
 echo "⚠️  前端开发模式已启动，生产环境请配置 Nginx"
 echo "=========================================="

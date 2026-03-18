@@ -12,15 +12,15 @@
 
 ```bash
 # 1. 上传代码到服务器
-scp -r cms root@47.85.61.231:/root/
+scp -r cms root@47.85.61.231:/home/admin/
 
 # 2. SSH 登录服务器
 ssh root@47.85.61.231
 
 # 3. 执行部署脚本
-cd cms
-chmod +x deploy.sh
-./deploy.sh
+cd /home/admin/cms
+chmod +x auto-deploy.sh
+./auto-deploy.sh
 ```
 
 ---
@@ -70,9 +70,9 @@ npm run build
 ### 5. 部署到生产目录
 
 ```bash
-mkdir -p /opt/cms
-cp backend/cms-backend /opt/cms/
-cp -r frontend/dist /opt/cms/dist
+mkdir -p /home/admin/cms-deploy
+cp backend/cms-backend /home/admin/cms-deploy/
+cp -r frontend/dist /home/admin/cms-deploy/dist
 ```
 
 ### 6. 配置 systemd 服务
@@ -86,8 +86,8 @@ After=network.target mysql.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/cms
-ExecStart=/opt/cms/cms-backend
+WorkingDirectory=/home/admin/cms-deploy
+ExecStart=/home/admin/cms-deploy/cms-backend
 Restart=always
 RestartSec=10
 StandardOutput=journal
