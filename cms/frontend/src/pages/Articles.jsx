@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Table, Button, Space, Tag, Typography, Popconfirm, message } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import api from '../api/axios'
+
+const { Title } = Typography
 
 function Articles() {
   const [articles, setArticles] = useState([])
@@ -16,55 +20,98 @@ function Articles() {
       setArticles(response.data)
     } catch (error) {
       console.error('Failed to load articles:', error)
+      message.error('Failed to load articles')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this article?')) {
-      try {
-        await api.delete(`/articles/${id}`)
-        loadArticles()
-      } catch (error) {
-        console.error('Failed to delete article:', error)
-      }
+    try {
+      await api.delete(`/articles/${id}`)
+      message.success('Article deleted successfully')
+      loadArticles()
+    } catch (error) {
+      console.error('Failed to delete article:', error)
+      message.error('Failed to delete article')
     }
   }
 
-  if (loading) return <div>Loading...</div>
+  const statusColors = {
+    draft: 'default',
+    published: 'success',
+    archived: 'default',
+  }
+
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+      render: (text, record) => (
+        <Link to={`/articles/${record.id}`}>{text}</Link>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => (
+        <Tag color={statusColors[status]}>{status.toUpperCase()}</Tag>
+      ),
+    },
+    {
+      title: 'Author',
+      dataIndex: ['author', 'username'],
+      key: 'author',
+    },
+    {
+      title: 'Category',
+      dataIndex: ['category', 'name'],
+      key: 'category',
+    },
+    {
+      title: 'Created',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date) => new Date(date).toLocaleDateString(),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="small">
+          <Link to={`/articles/${record.id}`}>
+            <Button type="link" icon={<EditOutlined />}>Edit</Button>
+          </Link>
+          <Popconfirm
+            title="Are you sure to delete this article?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>Delete</Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ]
 
   return (
-    <div className="articles-page">
-      <div className="page-header">
-        <h1>Articles</h1>
-        <Link to="/articles/new" className="btn-primary">+ New Article</Link>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={2} style={{ margin: 0 }}>Articles</Title>
+        <Link to="/articles/new">
+          <Button type="primary" icon={<PlusOutlined />}>New Article</Button>
+        </Link>
       </div>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Author</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {articles.map(article => (
-            <tr key={article.id}>
-              <td>{article.title}</td>
-              <td><span className={`status-badge ${article.status}`}>{article.status}</span></td>
-              <td>{article.author?.username || 'Unknown'}</td>
-              <td>{new Date(article.created_at).toLocaleDateString()}</td>
-              <td>
-                <Link to={`/articles/${article.id}`} className="btn-sm">Edit</Link>
-                <button onClick={() => handleDelete(article.id)} className="btn-sm btn-danger">Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Table
+        columns={columns}
+        dataSource={articles}
+        rowKey="id"
+        loading={loading}
+        pagination={{ pageSize: 10 }}
+      />
     </div>
   )
 }
